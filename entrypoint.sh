@@ -4,6 +4,11 @@ set -e          # Exit on error
 set -u          # Exit on undefined variable
 set -o pipefail # Exit on pipeline error
 
+if [ ! -d "$INPUT_OUTPUT_DIR" ]; then
+	echo "Error: Output directory $INPUT_OUTPUT_DIR does not exist"
+	mkdir -p "$INPUT_OUTPUT_DIR"
+fi
+
 if [ -n "$INPUT_SOURCE_DIR" ]; then
 	PACK_ARGS=()
 	if [ "$INPUT_FORCE" = "true" ]; then PACK_ARGS+=(--force); fi

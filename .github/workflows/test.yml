@@ -4,13 +4,10 @@ on:
   push:
 
 jobs:
-  build:
+  test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
-
-      - name: Create output directory
-        run: mkdir -p ./dist
 
       - name: Test package
         id: pack
@@ -21,17 +18,8 @@ jobs:
 
       - name: Verify output
         run: |
-          echo "Output zip-file: ${{ steps.pack.outputs.zip-file }}"
-          test -n "${{ steps.pack.outputs.zip-file }}"
-          test -f "${{ steps.pack.outputs.zip-file }}"
-
-      - name: Verify zip file exists
-        run: |
+          [ "${{ steps.pack.outputs.zip-file }}" == "./dist/test-extension@example.com.shell-extension.zip" ] || exit 1
           test -f ./dist/test-extension@example.com.shell-extension.zip
-          unzip -l ./dist/test-extension@example.com.shell-extension.zip
-
-      - name: Extract and compare
-        run: |
           mkdir -p ./extracted
-          unzip -q ./dist/*.shell-extension.zip -d ./extracted
+          unzip -q ./dist/test-extension@example.com.shell-extension.zip -d ./extracted
           diff -r ./test-extension ./extracted
