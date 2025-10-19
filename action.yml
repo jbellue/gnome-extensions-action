@@ -54,9 +54,8 @@ runs:
         mkdir -p "${{ inputs.output-dir }}"
         OUTPUT_DIR="$(cd "${{ inputs.output-dir }}" && pwd)"
 
-        # Build pack args
-        ARGS=""
-        [ "${{ inputs.force }}" = "true" ] && ARGS="$ARGS --force"
+        # Build pack args (always force to avoid conflicts)
+        ARGS="--force"
         [ -n "${{ inputs.extra-source }}" ] && ARGS="$ARGS --extra-source=${{ inputs.extra-source }}"
         [ -n "${{ inputs.schema }}" ] && ARGS="$ARGS --schema=${{ inputs.schema }}"
         [ -n "${{ inputs.podir }}" ] && ARGS="$ARGS --podir=${{ inputs.podir }}"
