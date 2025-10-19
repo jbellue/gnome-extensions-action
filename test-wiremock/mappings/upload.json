@@ -1,0 +1,22 @@
+{
+  "request": {
+    "method": "POST",
+    "urlPath": "/api/v1/extensions",
+    "headers": {
+      "Authorization": {
+        "matches": "Token .*"
+      }
+    }
+  },
+  "response": {
+    "status": 201,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "uuid": "test-extension@example.com",
+      "version": 1,
+      "status": "new"
+    }
+  }
+}

@@ -23,3 +23,33 @@ jobs:
           mkdir -p ./extracted
           unzip -q ./dist/test-extension@example.com.shell-extension.zip -d ./extracted
           diff -r ./test-extension ./extracted
+
+  test-upload:
+    runs-on: ubuntu-latest
+    services:
+      wiremock:
+        image: wiremock/wiremock:latest
+        ports:
+          - 8080:8080
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Import WireMock stubs
+        run: |
+          curl -v -d @./test-wiremock/mappings/login.json http://localhost:8080/__admin/mappings/import
+          curl -v -d @./test-wiremock/mappings/upload.json http://localhost:8080/__admin/mappings/import
+
+      - name: Test upload with mock server
+        uses: ./
+        env:
+          HTTPS_PROXY: http://wiremock:8080
+          HTTP_PROXY: http://wiremock:8080
+        with:
+          source-dir: ./test-extension
+          output-dir: ./dist
+          username: test-user
+          password: test-password
+          accept-tos: true
+
+      - name: Verify upload succeeded
+        run: echo "Upload test completed successfully"
