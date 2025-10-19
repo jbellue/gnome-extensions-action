@@ -13,15 +13,22 @@ jobs:
         run: mkdir -p ./dist
 
       - name: Test package
+        id: pack
         uses: ./
         with:
           source-dir: ./test-extension
           output-dir: ./dist
 
-      - name: Verify
+      - name: Verify output
         run: |
-          test -f ./dist/*.shell-extension.zip
-          unzip -l ./dist/*.shell-extension.zip
+          echo "Output zip-file: ${{ steps.pack.outputs.zip-file }}"
+          test -n "${{ steps.pack.outputs.zip-file }}"
+          test -f "${{ steps.pack.outputs.zip-file }}"
+
+      - name: Verify zip file exists
+        run: |
+          test -f ./dist/test-extension@example.com.shell-extension.zip
+          unzip -l ./dist/test-extension@example.com.shell-extension.zip
 
       - name: Extract and compare
         run: |
