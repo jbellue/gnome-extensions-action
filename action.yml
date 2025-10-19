@@ -45,15 +45,30 @@ outputs:
 runs:
   using: "composite"
   steps:
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v3
-    - name: Build gnome-extensions Docker image
-      uses: docker/build-push-action@v6
-      with:
-        load: true
-        tags: gnome-extensions-tool:latest
-        cache-from: type=gha
-        cache-to: type=gha,mode=max
+    - name: Package extension
+      id: pack
+      shell: bash
+      run: |
+        cd "${{ inputs.source-dir }}"
+
+        ARGS="--force --out-dir=${{ inputs.output-dir }}"
+        [ -n "${{ inputs.schema }}" ] && ARGS="$ARGS --schema=${{ inputs.schema }}"
+        [ -n "${{ inputs.podir }}" ] && ARGS="$ARGS --podir=${{ inputs.podir }}"
+        [ -n "${{ inputs.gettext-domain }}" ] && ARGS="$ARGS --gettext-domain=${{ inputs.gettext-domain }}"
+
+        docker run --rm -v "$(pwd):/src:ro" -v "$(pwd)/${{ inputs.output-dir }}:/out" \
+          "${{ inputs.image }}" pack $ARGS /src
+
+        echo "package-path=$(ls ${{ inputs.output-dir }}/*.shell-extension.zip)" >> $GITHUB_OUTPUT
+
+    - name: Upload extension
+      if: ${{ inputs.username && inputs.password }}
+      shell: bash
+      run: |
+        echo "${{ inputs.password }}" | docker run --rm -i \
+          -v "$(dirname ${{ steps.pack.outputs.package-path }}):/pkg:ro" \
+          "${{ inputs.image }}" upload --accept-tos \
+          -u "${{ inputs.username }}" -P- "/pkg/$(basename ${{ steps.pack.outputs.package-path }})"
 
 branding:
   icon: "package"

@@ -1,0 +1,20 @@
+name: Test
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Test pack
+        uses: ./
+        with:
+          source-dir: ./test-extension
+          output-dir: ./dist
+
+      - name: Verify
+        run: test -f ./dist/*.shell-extension.zip
