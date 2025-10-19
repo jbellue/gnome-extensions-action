@@ -41,7 +41,7 @@ inputs:
   accept-tos:
     description: "Accept the GNOME Extensions Developer Agreement"
     required: false
-    default: "false"
+    default: "true"
 
 outputs:
   zip-file:

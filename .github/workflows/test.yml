@@ -36,8 +36,8 @@ jobs:
 
       - name: Import WireMock stubs
         run: |
-          curl -v -d @./test-wiremock/mappings/login.json http://localhost:8080/__admin/mappings/import
-          curl -v -d @./test-wiremock/mappings/upload.json http://localhost:8080/__admin/mappings/import
+          curl -v -X POST -H "Content-Type: application/json" -d @./test-wiremock/mappings/login.json http://localhost:8080/__admin/mappings
+          curl -v -X POST -H "Content-Type: application/json" -d @./test-wiremock/mappings/upload.json http://localhost:8080/__admin/mappings
 
       - name: Test upload with mock server
         uses: ./

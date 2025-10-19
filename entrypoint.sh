@@ -5,7 +5,7 @@ set -u          # Exit on undefined variable
 set -o pipefail # Exit on pipeline error
 
 if [ ! -d "$INPUT_OUTPUT_DIR" ]; then
-	echo "Error: Output directory $INPUT_OUTPUT_DIR does not exist"
+	echo "Creating output directory $INPUT_OUTPUT_DIR"
 	mkdir -p "$INPUT_OUTPUT_DIR"
 fi
 
