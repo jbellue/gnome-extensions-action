@@ -40,9 +40,6 @@ RUN export DEBIAN_FRONTEND=noninteractive && \
     && rm -rf /var/lib/apt/lists/*
 
 COPY --from=builder /usr/bin/gnome-extensions /usr/bin/gnome-extensions
-RUN mkdir -p /app && chown -R ubuntu:ubuntu /app
-VOLUME /app
-WORKDIR /app
-USER ubuntu
+WORKDIR /github/workspace
 
 ENTRYPOINT ["gnome-extensions"]
