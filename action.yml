@@ -49,14 +49,17 @@ runs:
       id: pack
       shell: bash
       run: |
-        cd "${{ inputs.source-dir }}"
-
-        ARGS="--force --out-dir=${{ inputs.output-dir }}"
+        ARGS="--out-dir=/out"
+        [ "${{ inputs.force }}" = "true" ] && ARGS="$ARGS --force"
+        [ -n "${{ inputs.extra-source }}" ] && ARGS="$ARGS --extra-source=${{ inputs.extra-source }}"
         [ -n "${{ inputs.schema }}" ] && ARGS="$ARGS --schema=${{ inputs.schema }}"
         [ -n "${{ inputs.podir }}" ] && ARGS="$ARGS --podir=${{ inputs.podir }}"
         [ -n "${{ inputs.gettext-domain }}" ] && ARGS="$ARGS --gettext-domain=${{ inputs.gettext-domain }}"
 
-        docker run --rm -v "$(pwd):/src:ro" -v "$(pwd)/${{ inputs.output-dir }}:/out" \
+        mkdir -p "${{ inputs.output-dir }}"
+        docker run --rm \
+          -v "$(cd ${{ inputs.source-dir }} && pwd):/src:ro" \
+          -v "$(cd ${{ inputs.output-dir }} && pwd):/out" \
           "${{ inputs.image }}" pack $ARGS /src
 
         echo "package-path=$(ls ${{ inputs.output-dir }}/*.shell-extension.zip)" >> $GITHUB_OUTPUT
