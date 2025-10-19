@@ -63,6 +63,7 @@ runs:
         [ -n "${{ inputs.gettext-domain }}" ] && ARGS="$ARGS --gettext-domain=${{ inputs.gettext-domain }}"
 
         # Pack in source dir and move result
+        rm -f "$SOURCE_DIR"/*.shell-extension.zip
         docker run --rm -v "$SOURCE_DIR:/app" -w /app gnome-extensions-tool pack $ARGS .
         mv "$SOURCE_DIR"/*.shell-extension.zip "$OUTPUT_DIR/"
 
