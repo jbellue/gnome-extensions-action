@@ -2,10 +2,15 @@ name: "Package and Upload GNOME Extension"
 description: "Build and upload GNOME Shell extensions to extensions.gnome.org"
 author: "murar8"
 
+branding:
+  icon: "package"
+  color: "blue"
+
 inputs:
   source-dir:
     description: "Extension source directory (absolute or relative path)"
-    required: true
+    required: false
+    default: "."
   username:
     description: "Username for extensions.gnome.org (skip upload if not provided)"
     required: false
@@ -46,33 +51,13 @@ runs:
   using: "composite"
   steps:
     - name: Package extension
-      id: pack
+      id: package
       shell: bash
       run: |
-        ARGS="--out-dir=/out"
-        [ "${{ inputs.force }}" = "true" ] && ARGS="$ARGS --force"
-        [ -n "${{ inputs.extra-source }}" ] && ARGS="$ARGS --extra-source=${{ inputs.extra-source }}"
-        [ -n "${{ inputs.schema }}" ] && ARGS="$ARGS --schema=${{ inputs.schema }}"
-        [ -n "${{ inputs.podir }}" ] && ARGS="$ARGS --podir=${{ inputs.podir }}"
-        [ -n "${{ inputs.gettext-domain }}" ] && ARGS="$ARGS --gettext-domain=${{ inputs.gettext-domain }}"
-
-        mkdir -p "${{ inputs.output-dir }}"
-        docker run --rm \
-          -v "$(cd ${{ inputs.source-dir }} && pwd):/src:ro" \
-          -v "$(cd ${{ inputs.output-dir }} && pwd):/out" \
-          "${{ inputs.image }}" pack $ARGS /src
-
-        echo "package-path=$(ls ${{ inputs.output-dir }}/*.shell-extension.zip)" >> $GITHUB_OUTPUT
+        echo "Packaging extension"
 
     - name: Upload extension
       if: ${{ inputs.username && inputs.password }}
       shell: bash
       run: |
-        echo "${{ inputs.password }}" | docker run --rm -i \
-          -v "$(dirname ${{ steps.pack.outputs.package-path }}):/pkg:ro" \
-          "${{ inputs.image }}" upload --accept-tos \
-          -u "${{ inputs.username }}" -P- "/pkg/$(basename ${{ steps.pack.outputs.package-path }})"
-
-branding:
-  icon: "package"
-  color: "blue"
+        echo "Uploading extension to extensions.gnome.org"
