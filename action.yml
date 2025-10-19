@@ -52,6 +52,7 @@ runs:
       run: |
         # Get absolute paths
         SOURCE_DIR="$(cd "${{ inputs.source-dir }}" && pwd)"
+        mkdir -p "${{ inputs.output-dir }}"
         OUTPUT_DIR="$(cd "${{ inputs.output-dir }}" && pwd)"
 
         # Build pack command arguments
