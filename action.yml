@@ -50,58 +50,25 @@ runs:
       id: pack
       shell: bash
       run: |
-        # Get absolute paths
         SOURCE_DIR="$(cd "${{ inputs.source-dir }}" && pwd)"
         mkdir -p "${{ inputs.output-dir }}"
         OUTPUT_DIR="$(cd "${{ inputs.output-dir }}" && pwd)"
 
-        # Build pack command arguments
-        PACK_ARGS=()
-        PACK_ARGS+=("--out-dir=/output")
+        # Build pack args
+        ARGS=""
+        [ "${{ inputs.force }}" = "true" ] && ARGS="$ARGS --force"
+        [ -n "${{ inputs.extra-source }}" ] && ARGS="$ARGS --extra-source=${{ inputs.extra-source }}"
+        [ -n "${{ inputs.schema }}" ] && ARGS="$ARGS --schema=${{ inputs.schema }}"
+        [ -n "${{ inputs.podir }}" ] && ARGS="$ARGS --podir=${{ inputs.podir }}"
+        [ -n "${{ inputs.gettext-domain }}" ] && ARGS="$ARGS --gettext-domain=${{ inputs.gettext-domain }}"
 
-        if [ "${{ inputs.force }}" = "true" ]; then
-          PACK_ARGS+=("--force")
-        fi
+        # Pack in source dir and move result
+        docker run --rm -v "$SOURCE_DIR:/app" -w /app gnome-extensions-tool pack $ARGS .
+        mv "$SOURCE_DIR"/*.shell-extension.zip "$OUTPUT_DIR/"
 
-        # Handle extra sources
-        if [ -n "${{ inputs.extra-source }}" ]; then
-          IFS=',' read -ra SOURCES <<< "${{ inputs.extra-source }}"
-          for src in "${SOURCES[@]}"; do
-            PACK_ARGS+=("--extra-source=$src")
-          done
-        fi
-
-        # Handle schema
-        if [ -n "${{ inputs.schema }}" ]; then
-          PACK_ARGS+=("--schema=${{ inputs.schema }}")
-        fi
-
-        # Handle translations
-        if [ -n "${{ inputs.podir }}" ]; then
-          PACK_ARGS+=("--podir=${{ inputs.podir }}")
-        fi
-
-        if [ -n "${{ inputs.gettext-domain }}" ]; then
-          PACK_ARGS+=("--gettext-domain=${{ inputs.gettext-domain }}")
-        fi
-
-        # Run pack command
-        docker run --rm \
-          -v "$SOURCE_DIR:/source:ro" \
-          -v "$OUTPUT_DIR:/output" \
-          gnome-extensions-tool \
-          pack "${PACK_ARGS[@]}" /source
-
-        # Find the generated package
-        PACKAGE_FILE=$(find "$OUTPUT_DIR" -name "*.shell-extension.zip" -type f | head -1)
-
-        if [ -z "$PACKAGE_FILE" ]; then
-          echo "::error::Failed to find packaged extension"
-          exit 1
-        fi
-
+        PACKAGE_FILE=$(ls "$OUTPUT_DIR"/*.shell-extension.zip)
         echo "package-path=$PACKAGE_FILE" >> $GITHUB_OUTPUT
-        echo "::notice::Packaged extension: $PACKAGE_FILE"
+        echo "::notice::Packaged: $PACKAGE_FILE"
 
     - name: Upload extension
       if: ${{ inputs.username != '' && inputs.password != '' }}
