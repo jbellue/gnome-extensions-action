@@ -32,6 +32,10 @@ inputs:
     description: "Overwrite an existing pack"
     required: false
     default: "false"
+  image:
+    description: "Docker image to use for gnome-extensions tool"
+    required: false
+    default: "ghcr.io/murar8/gnome-extensions-action:latest"
 
 outputs:
   package-path:
