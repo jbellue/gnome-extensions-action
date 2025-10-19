@@ -93,7 +93,7 @@ runs:
           pack "${PACK_ARGS[@]}" /source
 
         # Find the generated package
-        PACKAGE_FILE=$(find "$OUTPUT_DIR" -name "*.shell-extension.zip" -type f -printf '%T@ %p\n' | sort -n | tail -1 | cut -d' ' -f2-)
+        PACKAGE_FILE=$(find "$OUTPUT_DIR" -name "*.shell-extension.zip" -type f | head -1)
 
         if [ -z "$PACKAGE_FILE" ]; then
           echo "::error::Failed to find packaged extension"
