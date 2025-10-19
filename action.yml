@@ -1,0 +1,127 @@
+name: 'Package and Upload GNOME Extension'
+description: 'Build and upload GNOME Shell extensions to extensions.gnome.org'
+author: 'murar8'
+
+inputs:
+  source-dir:
+    description: 'Extension source directory (absolute or relative path)'
+    required: true
+  username:
+    description: 'Username for extensions.gnome.org (skip upload if not provided)'
+    required: false
+  password:
+    description: 'Password for extensions.gnome.org (skip upload if not provided)'
+    required: false
+  extra-source:
+    description: 'Additional source files to include (comma-separated)'
+    required: false
+  schema:
+    description: 'GSettings schema that should be included'
+    required: false
+  podir:
+    description: 'Directory where translations are found'
+    required: false
+  gettext-domain:
+    description: 'Gettext domain to use for translations'
+    required: false
+  output-dir:
+    description: 'Directory where the package should be created'
+    required: false
+    default: '.'
+  force:
+    description: 'Overwrite an existing pack'
+    required: false
+    default: 'false'
+
+outputs:
+  package-path:
+    description: 'Path to the packaged extension .zip file'
+    value: ${{ steps.pack.outputs.package-path }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Build gnome-extensions Docker image
+      shell: bash
+      run: |
+        docker build -t gnome-extensions-tool ${{ github.action_path }}
+
+    - name: Package extension
+      id: pack
+      shell: bash
+      run: |
+        # Get absolute paths
+        SOURCE_DIR="$(cd "${{ inputs.source-dir }}" && pwd)"
+        OUTPUT_DIR="$(cd "${{ inputs.output-dir }}" && pwd)"
+
+        # Build pack command arguments
+        PACK_ARGS=()
+        PACK_ARGS+=("--out-dir=/output")
+
+        if [ "${{ inputs.force }}" = "true" ]; then
+          PACK_ARGS+=("--force")
+        fi
+
+        # Handle extra sources
+        if [ -n "${{ inputs.extra-source }}" ]; then
+          IFS=',' read -ra SOURCES <<< "${{ inputs.extra-source }}"
+          for src in "${SOURCES[@]}"; do
+            PACK_ARGS+=("--extra-source=$src")
+          done
+        fi
+
+        # Handle schema
+        if [ -n "${{ inputs.schema }}" ]; then
+          PACK_ARGS+=("--schema=${{ inputs.schema }}")
+        fi
+
+        # Handle translations
+        if [ -n "${{ inputs.podir }}" ]; then
+          PACK_ARGS+=("--podir=${{ inputs.podir }}")
+        fi
+
+        if [ -n "${{ inputs.gettext-domain }}" ]; then
+          PACK_ARGS+=("--gettext-domain=${{ inputs.gettext-domain }}")
+        fi
+
+        # Run pack command
+        docker run --rm \
+          -v "$SOURCE_DIR:/source:ro" \
+          -v "$OUTPUT_DIR:/output" \
+          gnome-extensions-tool \
+          pack "${PACK_ARGS[@]}" /source
+
+        # Find the generated package
+        PACKAGE_FILE=$(find "$OUTPUT_DIR" -name "*.shell-extension.zip" -type f -printf '%T@ %p\n' | sort -n | tail -1 | cut -d' ' -f2-)
+
+        if [ -z "$PACKAGE_FILE" ]; then
+          echo "::error::Failed to find packaged extension"
+          exit 1
+        fi
+
+        echo "package-path=$PACKAGE_FILE" >> $GITHUB_OUTPUT
+        echo "::notice::Packaged extension: $PACKAGE_FILE"
+
+    - name: Upload extension
+      if: ${{ inputs.username != '' && inputs.password != '' }}
+      shell: bash
+      run: |
+        PACKAGE_FILE="${{ steps.pack.outputs.package-path }}"
+        PACKAGE_DIR="$(dirname "$PACKAGE_FILE")"
+        PACKAGE_NAME="$(basename "$PACKAGE_FILE")"
+
+        # Upload with credentials via stdin
+        echo "${{ inputs.password }}" | docker run --rm -i \
+          -v "$PACKAGE_DIR:/packages:ro" \
+          gnome-extensions-tool \
+          upload \
+          --accept-tos \
+          --user "${{ inputs.username }}" \
+          --password-file=- \
+          "/packages/$PACKAGE_NAME"
+
+        echo "::notice::Successfully uploaded extension to extensions.gnome.org"
+
+branding:
+  icon: 'package'
+  color: 'blue'

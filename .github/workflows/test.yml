@@ -1,0 +1,27 @@
+name: Test Action
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  test-pack:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Test pack only (no upload)
+        uses: ./
+        with:
+          source-dir: ./test-extension
+          output-dir: ./dist
+
+      - name: Check package was created
+        run: |
+          ls -la ./dist/
+          if [ ! -f ./dist/*.shell-extension.zip ]; then
+            echo "Package not found!"
+            exit 1
+          fi
+          echo "Package created successfully!"
