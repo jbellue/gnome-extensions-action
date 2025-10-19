@@ -10,12 +10,11 @@ inputs:
     description: "Extension source directory (absolute or relative path)"
     required: false
     default: "."
-  username:
-    description: "Username for extensions.gnome.org (skip upload if not provided)"
+  output-dir:
+    description: "Directory where the package should be created"
     required: false
-  password:
-    description: "Password for extensions.gnome.org (skip upload if not provided)"
-    required: false
+    default: "."
+
   extra-source:
     description: "Additional source files to include (comma-separated)"
     required: false
@@ -28,24 +27,33 @@ inputs:
   gettext-domain:
     description: "Gettext domain to use for translations"
     required: false
-  output-dir:
-    description: "Directory where the package should be created"
-    required: false
-    default: "."
   force:
     description: "Overwrite an existing pack"
+    required: false
+    default: "false"
+
+  username:
+    description: "Username for extensions.gnome.org (skip upload if not provided)"
+    required: false
+  password:
+    description: "Password for extensions.gnome.org (skip upload if not provided)"
+    required: false
+  accept-tos:
+    description: "Accept the GNOME Extensions Developer Agreement"
     required: false
     default: "false"
 
 runs:
   using: "docker"
   image: "Dockerfile"
-  args:
-    - "pack"
-    # - "--extra-source=${{ inputs.extra-source }}"
-    # - "--schema=${{ inputs.schema }}"
-    # - "--podir=${{ inputs.podir }}"
-    # - "--gettext-domain=${{ inputs.gettext-domain }}"
-    # - "--force=${{ inputs.force }}"
-    - "--out-dir=${{ inputs.output-dir }}"
-    - "${{ inputs.source-dir }}"
+  env:
+    INPUT_SOURCE_DIR: ${{ inputs.source-dir }}
+    INPUT_USERNAME: ${{ inputs.username }}
+    INPUT_PASSWORD: ${{ inputs.password }}
+    INPUT_EXTRA_SOURCE: ${{ inputs.extra-source }}
+    INPUT_SCHEMA: ${{ inputs.schema }}
+    INPUT_PODIR: ${{ inputs.podir }}
+    INPUT_GETTEXT_DOMAIN: ${{ inputs.gettext-domain }}
+    INPUT_OUTPUT_DIR: ${{ inputs.output-dir }}
+    INPUT_FORCE: ${{ inputs.force }}
+    INPUT_ACCEPT_TOS: ${{ inputs.accept-tos }}

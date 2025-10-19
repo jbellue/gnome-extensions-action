@@ -9,6 +9,9 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
+      - name: Create output directory
+        run: mkdir -p ./dist
+
       - name: Test package
         uses: ./
         with:
@@ -16,4 +19,12 @@ jobs:
           output-dir: ./dist
 
       - name: Verify
-        run: test -f ./dist/*.shell-extension.zip
+        run: |
+          test -f ./dist/*.shell-extension.zip
+          unzip -l ./dist/*.shell-extension.zip
+
+      - name: Extract and compare
+        run: |
+          mkdir -p ./extracted
+          unzip -q ./dist/*.shell-extension.zip -d ./extracted
+          diff -r ./test-extension ./extracted

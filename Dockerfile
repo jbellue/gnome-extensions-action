@@ -1,4 +1,17 @@
-FROM ubuntu:25.10 AS builder
+FROM ubuntu:25.10 AS base
+
+RUN export DEBIAN_FRONTEND=noninteractive && \
+    apt-get update && \
+    apt-get install -y --no-install-recommends \
+    ca-certificates \
+    libglib2.0-0t64 \
+    libgnome-autoar-0-0 \
+    libjson-glib-1.0-0 \
+    libsoup-3.0-0 \
+    && rm -rf /var/lib/apt/lists/*
+
+
+FROM base AS builder
 
 RUN export DEBIAN_FRONTEND=noninteractive && \
     apt-get update && \
@@ -8,7 +21,6 @@ RUN export DEBIAN_FRONTEND=noninteractive && \
     gcc \
     pkg-config \
     git \
-    ca-certificates \
     gettext \
     libglib2.0-dev \
     libgnome-autoar-0-dev \
@@ -27,19 +39,11 @@ RUN meson setup --prefix=/usr --buildtype=release -Dman=false builddir && \
     meson install -C builddir
 
 
-FROM ubuntu:25.10
-
-RUN export DEBIAN_FRONTEND=noninteractive && \
-    apt-get update && \
-    apt-get install -y --no-install-recommends \
-    ca-certificates \
-    libglib2.0-0t64 \
-    libgnome-autoar-0-0 \
-    libjson-glib-1.0-0 \
-    libsoup-3.0-0 \
-    && rm -rf /var/lib/apt/lists/*
+FROM base
 
 COPY --from=builder /usr/bin/gnome-extensions /usr/bin/gnome-extensions
+COPY --chown=root:root entrypoint.sh /entrypoint.sh
+
 WORKDIR /github/workspace
 
-ENTRYPOINT ["gnome-extensions"]
+ENTRYPOINT ["/entrypoint.sh"]
