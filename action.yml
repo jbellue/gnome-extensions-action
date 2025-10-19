@@ -48,16 +48,7 @@ outputs:
     value: ${{ steps.pack.outputs.package-path }}
 
 runs:
-  using: "composite"
-  steps:
-    - name: Package extension
-      id: package
-      shell: bash
-      run: |
-        echo "Packaging extension"
-
-    - name: Upload extension
-      if: ${{ inputs.username && inputs.password }}
-      shell: bash
-      run: |
-        echo "Uploading extension to extensions.gnome.org"
+  using: "docker"
+  image: "Dockerfile"
+  args:
+    - "help"
