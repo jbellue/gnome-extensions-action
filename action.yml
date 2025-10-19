@@ -63,10 +63,16 @@ runs:
         [ -n "${{ inputs.gettext-domain }}" ] && ARGS="$ARGS --gettext-domain=${{ inputs.gettext-domain }}"
 
         # Pack in source dir and move result
-        rm -f "$SOURCE_DIR"/*.shell-extension.zip
-        docker run --rm -v "$SOURCE_DIR:/app" -w /app gnome-extensions-tool pack $ARGS .
-        mv "$SOURCE_DIR"/*.shell-extension.zip "$OUTPUT_DIR/"
+        rm -f "$SOURCE_DIR"/*.shell-extension.zip || true
+        docker run --rm -v "$SOURCE_DIR:/app" -w /app gnome-extensions-tool pack $ARGS . || exit 1
 
+        ZIP_FILE="$SOURCE_DIR"/*.shell-extension.zip
+        if [ ! -f $ZIP_FILE ]; then
+          echo "::error::Pack did not create zip file"
+          exit 1
+        fi
+
+        mv "$ZIP_FILE" "$OUTPUT_DIR/"
         PACKAGE_FILE=$(ls "$OUTPUT_DIR"/*.shell-extension.zip)
         echo "package-path=$PACKAGE_FILE" >> $GITHUB_OUTPUT
         echo "::notice::Packaged: $PACKAGE_FILE"
