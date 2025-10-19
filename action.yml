@@ -1,101 +1,56 @@
-name: 'Package and Upload GNOME Extension'
-description: 'Build and upload GNOME Shell extensions to extensions.gnome.org'
-author: 'murar8'
+name: "Package and Upload GNOME Extension"
+description: "Build and upload GNOME Shell extensions to extensions.gnome.org"
+author: "murar8"
 
 inputs:
   source-dir:
-    description: 'Extension source directory (absolute or relative path)'
+    description: "Extension source directory (absolute or relative path)"
     required: true
   username:
-    description: 'Username for extensions.gnome.org (skip upload if not provided)'
+    description: "Username for extensions.gnome.org (skip upload if not provided)"
     required: false
   password:
-    description: 'Password for extensions.gnome.org (skip upload if not provided)'
+    description: "Password for extensions.gnome.org (skip upload if not provided)"
     required: false
   extra-source:
-    description: 'Additional source files to include (comma-separated)'
+    description: "Additional source files to include (comma-separated)"
     required: false
   schema:
-    description: 'GSettings schema that should be included'
+    description: "GSettings schema that should be included"
     required: false
   podir:
-    description: 'Directory where translations are found'
+    description: "Directory where translations are found"
     required: false
   gettext-domain:
-    description: 'Gettext domain to use for translations'
+    description: "Gettext domain to use for translations"
     required: false
   output-dir:
-    description: 'Directory where the package should be created'
+    description: "Directory where the package should be created"
     required: false
-    default: '.'
+    default: "."
   force:
-    description: 'Overwrite an existing pack'
+    description: "Overwrite an existing pack"
     required: false
-    default: 'false'
+    default: "false"
 
 outputs:
   package-path:
-    description: 'Path to the packaged extension .zip file'
+    description: "Path to the packaged extension .zip file"
     value: ${{ steps.pack.outputs.package-path }}
 
 runs:
-  using: 'composite'
+  using: "composite"
   steps:
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
     - name: Build gnome-extensions Docker image
-      shell: bash
-      run: |
-        docker build -t gnome-extensions-tool ${{ github.action_path }}
-
-    - name: Package extension
-      id: pack
-      shell: bash
-      run: |
-        SOURCE_DIR="$(cd "${{ inputs.source-dir }}" && pwd)"
-        mkdir -p "${{ inputs.output-dir }}"
-        OUTPUT_DIR="$(cd "${{ inputs.output-dir }}" && pwd)"
-
-        # Build pack args (always force to avoid conflicts)
-        ARGS="--force"
-        [ -n "${{ inputs.extra-source }}" ] && ARGS="$ARGS --extra-source=${{ inputs.extra-source }}"
-        [ -n "${{ inputs.schema }}" ] && ARGS="$ARGS --schema=${{ inputs.schema }}"
-        [ -n "${{ inputs.podir }}" ] && ARGS="$ARGS --podir=${{ inputs.podir }}"
-        [ -n "${{ inputs.gettext-domain }}" ] && ARGS="$ARGS --gettext-domain=${{ inputs.gettext-domain }}"
-
-        # Pack in source dir and move result
-        rm -f "$SOURCE_DIR"/*.shell-extension.zip || true
-        docker run --rm -v "$SOURCE_DIR:/app" -w /app gnome-extensions-tool pack $ARGS . || exit 1
-
-        ZIP_FILE="$SOURCE_DIR"/*.shell-extension.zip
-        if [ ! -f $ZIP_FILE ]; then
-          echo "::error::Pack did not create zip file"
-          exit 1
-        fi
-
-        mv "$ZIP_FILE" "$OUTPUT_DIR/"
-        PACKAGE_FILE=$(ls "$OUTPUT_DIR"/*.shell-extension.zip)
-        echo "package-path=$PACKAGE_FILE" >> $GITHUB_OUTPUT
-        echo "::notice::Packaged: $PACKAGE_FILE"
-
-    - name: Upload extension
-      if: ${{ inputs.username != '' && inputs.password != '' }}
-      shell: bash
-      run: |
-        PACKAGE_FILE="${{ steps.pack.outputs.package-path }}"
-        PACKAGE_DIR="$(dirname "$PACKAGE_FILE")"
-        PACKAGE_NAME="$(basename "$PACKAGE_FILE")"
-
-        # Upload with credentials via stdin
-        echo "${{ inputs.password }}" | docker run --rm -i \
-          -v "$PACKAGE_DIR:/packages:ro" \
-          gnome-extensions-tool \
-          upload \
-          --accept-tos \
-          --user "${{ inputs.username }}" \
-          --password-file=- \
-          "/packages/$PACKAGE_NAME"
-
-        echo "::notice::Successfully uploaded extension to extensions.gnome.org"
+      uses: docker/build-push-action@v6
+      with:
+        load: true
+        tags: gnome-extensions-tool:latest
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
 
 branding:
-  icon: 'package'
-  color: 'blue'
+  icon: "package"
+  color: "blue"
