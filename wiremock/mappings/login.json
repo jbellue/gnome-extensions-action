@@ -9,10 +9,8 @@
       "Content-Type": "application/json"
     },
     "jsonBody": {
-      "token": {
-        "token": "mock-auth-token-12345",
-        "expiry": "2026-12-31T23:59:59Z"
-      }
+      "token": "mock-test-token-12345",
+      "expiry": "2099-12-31T23:59:59Z"
     }
   }
 }

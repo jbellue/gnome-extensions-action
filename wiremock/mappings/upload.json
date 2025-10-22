@@ -16,7 +16,7 @@
     "jsonBody": {
       "uuid": "test-extension@example.com",
       "version": 1,
-      "status": "new"
+      "status": "active"
     }
   }
 }

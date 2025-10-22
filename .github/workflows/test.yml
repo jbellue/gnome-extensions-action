@@ -26,24 +26,29 @@ jobs:
 
   test-upload:
     runs-on: ubuntu-latest
-    services:
-      wiremock:
-        image: wiremock/wiremock:latest
-        ports:
-          - 8080:8080
     steps:
       - uses: actions/checkout@v5
 
-      - name: Import WireMock stubs
+      - name: Build and start WireMock server
         run: |
-          curl -v -X POST -H "Content-Type: application/json" -d @./test-wiremock/mappings/login.json http://localhost:8080/__admin/mappings
-          curl -v -X POST -H "Content-Type: application/json" -d @./test-wiremock/mappings/upload.json http://localhost:8080/__admin/mappings
+          docker build -t wiremock-test ./wiremock
+          docker run -d --name wiremock \
+            --network host \
+            wiremock-test
+          # Wait for WireMock to be ready
+          sleep 5
+
+      - name: Configure host to use mock server
+        run: |
+          # Redirect extensions.gnome.org to localhost where WireMock is running
+          echo "127.0.0.1 extensions.gnome.org" | sudo tee -a /etc/hosts
+
+          # Trust the self-signed certificate system-wide
+          sudo cp cert.pem /usr/local/share/ca-certificates/wiremock.crt
+          sudo update-ca-certificates
 
       - name: Test upload with mock server
         uses: ./
-        env:
-          HTTPS_PROXY: http://wiremock:8080
-          HTTP_PROXY: http://wiremock:8080
         with:
           source-dir: ./test-extension
           output-dir: ./dist
@@ -51,5 +56,10 @@ jobs:
           password: test-password
           accept-tos: true
 
-      - name: Verify upload succeeded
-        run: echo "Upload test completed successfully"
+      - name: Check WireMock logs
+        if: always()
+        run: docker logs wiremock
+
+      - name: Stop WireMock
+        if: always()
+        run: docker stop wiremock && docker rm wiremock
