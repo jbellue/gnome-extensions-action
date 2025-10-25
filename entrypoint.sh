@@ -1,7 +1,6 @@
 #!/bin/bash
 
 set -e          # Exit on error
-set -u          # Exit on undefined variable
 set -o pipefail # Exit on pipeline error
 
 if [ ! -d "$INPUT_OUTPUT_DIR" ]; then

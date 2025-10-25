@@ -42,27 +42,18 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      - name: Upload extension
-        run: |
-          docker compose -f docker-compose.test.yml run --rm upload
+      - name: Run tests
+        run: test.sh
 
       - name: Docker logs
         if: always()
-        run: |
-          docker compose -f docker-compose.test.yml logs
-
-      - name: Verify output
-        run: |
-          test -f ./dist/test-extension@example.com.shell-extension.zip
-          mkdir -p ./extracted
-          unzip -q ./dist/test-extension@example.com.shell-extension.zip -d ./extracted
-          diff -r ./test-extension ./extracted
+        run: docker compose -f docker-compose.test.yml logs
 
       - name: Docker meta
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ghcr.io/murar8/gnome-extensions-tool
+          images: ghcr.io/${{ github.repository }}
           tags: |
             type=raw,value=latest
             type=sha,format=short
