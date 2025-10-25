@@ -25,6 +25,18 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Test
+        run: |
+          docker compose -f docker-compose.test.yml run --rm --exit-code-from upload upload
+
+      - name: Verify output
+        run: |
+          [ "${{ steps.pack.outputs.zip-file }}" == "./dist/test-extension@example.com.shell-extension.zip" ] || exit 1
+          test -f ./dist/test-extension@example.com.shell-extension.zip
+          mkdir -p ./extracted
+          unzip -q ./dist/test-extension@example.com.shell-extension.zip -d ./extracted
+          diff -r ./test-extension ./extracted
+
       - name: Docker meta
         id: meta
         uses: docker/metadata-action@v5

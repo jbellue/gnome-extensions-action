@@ -12,11 +12,11 @@ services:
       timeout: 3s
       retries: 10
 
-  test-action:
+  upload:
     build:
       context: .
       target: test
-    container_name: gnome-extensions-test
+    container_name: gnome-extensions-tool
     depends_on:
       wiremock:
         condition: service_healthy
