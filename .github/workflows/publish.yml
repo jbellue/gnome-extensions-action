@@ -43,7 +43,7 @@ jobs:
           cache-to: type=gha,mode=max
 
       - name: Run tests
-        run: test.sh
+        run: ./test.sh
 
       - name: Docker logs
         if: always()
