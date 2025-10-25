@@ -25,9 +25,30 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Build test image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          load: true
+          target: test
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Build wiremock image
+        uses: docker/build-push-action@v6
+        with:
+          context: wiremock
+          load: true
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
       - name: Test
         run: |
           docker compose -f docker-compose.test.yml run --rm upload
+          test -f ./dist/test-extension@example.com.shell-extension.zip
+          mkdir -p ./extracted
+          unzip -q ./dist/test-extension@example.com.shell-extension.zip -d ./extracted
+          diff -r ./test-extension ./extracted
 
       - name: Verify output
         run: |
