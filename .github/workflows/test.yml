@@ -30,25 +30,17 @@ jobs:
       - uses: actions/checkout@v5
 
       - name: Build and start WireMock server
+        id: wiremock
         run: |
           docker build -t wiremock-test ./wiremock
-          docker run -d --name wiremock \
-            --network host \
-            wiremock-test
-          # Wait for WireMock to be ready
-          sleep 5
-
-      - name: Configure host to use mock server
-        run: |
-          # Redirect extensions.gnome.org to localhost where WireMock is running
-          echo "127.0.0.1 extensions.gnome.org" | sudo tee -a /etc/hosts
-
-          # Trust the self-signed certificate system-wide
-          sudo cp cert.pem /usr/local/share/ca-certificates/wiremock.crt
-          sudo update-ca-certificates
+          docker run -d --name wiremock wiremock-test
+          sleep 5 # Wait for WireMock to be ready
+          echo "::set-output name=ip::$(docker inspect --format='{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' wiremock)"
 
       - name: Test upload with mock server
         uses: ./
+        env:
+          HTTPS_PROXY: http://${{ steps.wiremock.outputs.ip }}:443
         with:
           source-dir: ./test-extension
           output-dir: ./dist
