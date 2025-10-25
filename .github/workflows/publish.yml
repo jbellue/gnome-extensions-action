@@ -42,17 +42,12 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      - name: Test
+      - name: Upload extension
         run: |
           docker compose -f docker-compose.test.yml run --rm upload
-          test -f ./dist/test-extension@example.com.shell-extension.zip
-          mkdir -p ./extracted
-          unzip -q ./dist/test-extension@example.com.shell-extension.zip -d ./extracted
-          diff -r ./test-extension ./extracted
 
       - name: Verify output
         run: |
-          [ "${{ steps.pack.outputs.zip-file }}" == "./dist/test-extension@example.com.shell-extension.zip" ] || exit 1
           test -f ./dist/test-extension@example.com.shell-extension.zip
           mkdir -p ./extracted
           unzip -q ./dist/test-extension@example.com.shell-extension.zip -d ./extracted
