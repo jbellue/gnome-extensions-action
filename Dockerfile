@@ -39,15 +39,23 @@ RUN meson setup --prefix=/usr --buildtype=release -Dman=false builddir && \
     meson install -C builddir
 
 
-FROM base
+FROM base AS app
 
 COPY --from=builder /usr/bin/gnome-extensions /usr/bin/gnome-extensions
 COPY --chown=root:root entrypoint.sh /entrypoint.sh
 
-# Support for test mode: trust self-signed certificate if present
-COPY cert.pem /usr/local/share/ca-certificates/wiremock.crt
-RUN update-ca-certificates
-
 WORKDIR /github/workspace
+VOLUME /github/workspace
 
 ENTRYPOINT ["/entrypoint.sh"]
+
+
+FROM app AS test
+
+# Support for test mode: trust self-signed certificate
+COPY wiremock/cert.pem /usr/local/share/ca-certificates/wiremock.crt
+RUN update-ca-certificates
+
+
+# Make sure we don't copy the test certificate to the final image by default.
+FROM app

@@ -1,0 +1,43 @@
+services:
+  wiremock:
+    build: ./wiremock
+    container_name: wiremock
+    networks:
+      test-network:
+        aliases:
+          - extensions.gnome.org
+    healthcheck:
+      test: ["CMD", "curl", "-k", "https://localhost:443/__admin/health"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  test-action:
+    build:
+      context: .
+      target: test
+    container_name: gnome-extensions-test
+    depends_on:
+      wiremock:
+        condition: service_healthy
+    networks:
+      - test-network
+    volumes:
+      - ./test-extension:/github/workspace/test-extension:ro
+      - ./dist:/github/workspace/dist
+    environment:
+      INPUT_SOURCE_DIR: ./test-extension
+      INPUT_OUTPUT_DIR: ./dist
+      INPUT_USERNAME: test-user
+      INPUT_PASSWORD: test-password
+      INPUT_ACCEPT_TOS: "true"
+      INPUT_FORCE: "true"
+      INPUT_EXTRA_SOURCE: ""
+      INPUT_GETTEXT_DOMAIN: ""
+      INPUT_PODIR: ""
+      INPUT_SCHEMA: ""
+      GITHUB_OUTPUT: /tmp/github_output.txt
+
+networks:
+  test-network:
+    driver: bridge

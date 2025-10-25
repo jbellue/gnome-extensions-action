@@ -31,6 +31,10 @@ inputs:
     description: "Overwrite an existing pack"
     required: false
     default: "false"
+  image:
+    description: "Docker image to use"
+    required: false
+    default: "ghcr.io/tim-sueberkrueb/gnome-shell-extension-packager:latest"
 
   username:
     description: "Username for extensions.gnome.org (skip upload if not provided)"
@@ -49,7 +53,7 @@ outputs:
 
 runs:
   using: "docker"
-  image: "Dockerfile"
+  image: "ghcr.io/murar8/gnome-extensions-action:latest"
   env:
     INPUT_SOURCE_DIR: ${{ inputs.source-dir }}
     INPUT_USERNAME: ${{ inputs.username }}
