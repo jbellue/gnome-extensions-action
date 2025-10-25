@@ -45,10 +45,8 @@ COPY --from=builder /usr/bin/gnome-extensions /usr/bin/gnome-extensions
 COPY --chown=root:root entrypoint.sh /entrypoint.sh
 
 # Support for test mode: trust self-signed certificate if present
-COPY cert.pe[m] /usr/local/share/ca-certificates/wiremock.crt* 2>/dev/null || :
-RUN if [ -f /usr/local/share/ca-certificates/wiremock.crt ]; then \
-        update-ca-certificates; \
-    fi
+COPY cert.pem /usr/local/share/ca-certificates/wiremock.crt
+RUN update-ca-certificates
 
 WORKDIR /github/workspace
 
