@@ -25,36 +25,16 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Docker meta for test image
-        id: meta-test
-        uses: docker/metadata-action@v5
-        with:
-          images: ghcr.io/${{ github.repository }}
-          tags: |
-            type=raw,value=test
-            type=sha,format=short
-
-      - name: Build and push test image
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          push: true
-          target: test
-          tags: ${{ steps.meta-test.outputs.tags }}
-          labels: ${{ steps.meta-test.outputs.labels }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-
-      - name: Docker meta for main image
+      - name: Docker meta
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ghcr.io/${{ github.repository }}
+          images: ghcr.io/murar8/gnome-extensions-tool
           tags: |
             type=raw,value=latest
             type=sha,format=short
 
-      - name: Build and push main image
+      - name: Build and push
         uses: docker/build-push-action@v6
         with:
           context: .
