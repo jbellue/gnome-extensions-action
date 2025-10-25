@@ -46,6 +46,11 @@ jobs:
         run: |
           docker compose -f docker-compose.test.yml run --rm upload
 
+      - name: Docker logs
+        if: always()
+        run: |
+          docker compose -f docker-compose.test.yml logs
+
       - name: Verify output
         run: |
           test -f ./dist/test-extension@example.com.shell-extension.zip
