@@ -6,7 +6,7 @@ A GitHub Action that packages and uploads GNOME Shell extensions to extensions.g
 
 ```yaml
 - name: Package and Upload Extension
-  uses: murar8/gnome-extensions-action@main
+  uses: murar8/gnome-extensions-action@0.1.0
   with:
     source-dir: ./my-extension
     username: ${{ secrets.GNOME_USERNAME }}
@@ -40,7 +40,7 @@ A GitHub Action that packages and uploads GNOME Shell extensions to extensions.g
 ### Package only (no upload)
 
 ```yaml
-- uses: murar8/gnome-extensions-action@main
+- uses: murar8/gnome-extensions-action@0.1.0
   with:
     source-dir: ./extension
 ```
@@ -48,7 +48,7 @@ A GitHub Action that packages and uploads GNOME Shell extensions to extensions.g
 ### Package and upload
 
 ```yaml
-- uses: murar8/gnome-extensions-action@main
+- uses: murar8/gnome-extensions-action@0.1.0
   with:
     source-dir: ./extension
     username: ${{ secrets.GNOME_USERNAME }}
