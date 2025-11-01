@@ -25,7 +25,6 @@ A GitHub Action that packages and uploads GNOME Shell extensions to extensions.g
 | `podir` | Directory where translations are found | No | |
 | `gettext-domain` | Gettext domain to use for translations | No | |
 | `force` | Overwrite an existing pack | No | `false` |
-| `image` | Docker image to use | No | `ghcr.io/tim-sueberkrueb/gnome-shell-extension-packager:latest` |
 | `username` | Username for extensions.gnome.org (skip upload if not provided) | No | |
 | `password` | Password for extensions.gnome.org (skip upload if not provided) | No | |
 | `accept-tos` | Accept the GNOME Extensions Developer Agreement | No | `false` |

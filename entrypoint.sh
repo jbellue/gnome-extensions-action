@@ -21,7 +21,7 @@ fi
 
 ZIP_FILE=$(find "$INPUT_OUTPUT_DIR" -maxdepth 1 -name "*.shell-extension.zip" -print -quit)
 if [ -z "$ZIP_FILE" ]; then
-	echo "Error: No .shell-extension.zip file found in $OUTPUT_DIR"
+	echo "Error: No .shell-extension.zip file found in $INPUT_OUTPUT_DIR"
 	exit 1
 else
 	echo "zip-file=$ZIP_FILE" >>$GITHUB_OUTPUT
