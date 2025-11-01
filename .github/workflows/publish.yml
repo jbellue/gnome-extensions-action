@@ -47,20 +47,6 @@ jobs:
       - name: Test container
         run: ./test.sh
 
-      - name: Test extension
-        uses: ./
-        with:
-          source-dir: ./test-extension
-          output-dir: ./dist
-
-      - name: Verify extension
-        run: |
-          test -f ./dist/test-extension@example.com.shell-extension.zip
-          mkdir -p $tmpdir/extracted
-          unzip -q ./dist/test-extension@example.com.shell-extension.zip -d $tmpdir/extracted
-          diff -r ./test-extension $tmpdir/extracted
-          rm -rf $tmpdir
-
       - name: Docker logs
         if: always()
         run: docker compose -f docker-compose.test.yml logs
@@ -84,3 +70,17 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+      - name: Test extension
+        uses: ./
+        with:
+          source-dir: ./test-extension
+          output-dir: ./build
+
+      - name: Verify extension
+        run: |
+          test -f ./build/test-extension@example.com.shell-extension.zip
+          mkdir -p $tmpdir/extracted
+          unzip -q ./build/test-extension@example.com.shell-extension.zip -d $tmpdir/extracted
+          diff -r ./test-extension $tmpdir/extracted
+          rm -rf $tmpdir
