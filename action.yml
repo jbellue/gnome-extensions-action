@@ -49,7 +49,7 @@ outputs:
 
 runs:
   using: "docker"
-  image: "ghcr.io/murar8/gnome-extensions-action:latest"
+  image: "docker://ghcr.io/murar8/gnome-extensions-action:latest"
   env:
     INPUT_SOURCE_DIR: ${{ inputs.source-dir }}
     INPUT_USERNAME: ${{ inputs.username }}
