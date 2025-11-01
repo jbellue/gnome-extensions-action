@@ -7,11 +7,11 @@ branding:
 
 inputs:
   source-dir:
-    description: "Extension source directory (absolute or relative path)"
+    description: "Extension source directory"
     required: false
     default: "."
   output-dir:
-    description: "Directory where the package should be created"
+    description: "Package output directory"
     required: false
     default: "."
 
@@ -31,10 +31,6 @@ inputs:
     description: "Overwrite an existing pack"
     required: false
     default: "false"
-  image:
-    description: "Docker image to use"
-    required: false
-    default: "ghcr.io/tim-sueberkrueb/gnome-shell-extension-packager:latest"
 
   username:
     description: "Username for extensions.gnome.org (skip upload if not provided)"
