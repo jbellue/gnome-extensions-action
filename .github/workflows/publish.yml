@@ -44,9 +44,9 @@ jobs:
         if: always()
         run: docker compose -f docker-compose.test.yml logs
 
-  publish:
+  publish-docker:
     runs-on: ubuntu-latest
-    if: github.event_name != 'pull_request'
+    if: github.ref_type == 'tag'
     permissions:
       packages: write
     needs: test
