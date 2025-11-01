@@ -76,3 +76,4 @@ jobs:
         with:
           prerelease: ${{ github.ref_type != 'tag' }}
           tag_name: ${{ github.ref_name }}
+          allowUpdates: true
