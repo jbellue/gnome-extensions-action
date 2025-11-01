@@ -72,8 +72,9 @@ jobs:
           cache-to: type=gha,mode=max
 
       - name: Release
-        uses: softprops/action-gh-release@v2
+        uses: ncipollo/release-action@v1
         with:
           prerelease: ${{ github.ref_type != 'tag' }}
-          tag_name: ${{ github.ref_name }}
+          tag: ${{ github.ref_name }}
+          commit: ${{ github.sha }}
           allowUpdates: true
