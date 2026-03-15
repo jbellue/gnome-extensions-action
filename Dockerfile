@@ -56,8 +56,5 @@ FROM app AS test
 COPY wiremock/cert.pem /usr/local/share/ca-certificates/wiremock.crt
 RUN update-ca-certificates
 
-# Fix: msgfmt available for translations
-RUN apt-get update && apt-get install -y gettext-base && rm -rf /var/lib/apt/lists/*
-
 # Make sure we don't copy the test certificate to the final image by default.
 FROM app
