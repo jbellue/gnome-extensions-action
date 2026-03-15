@@ -8,7 +8,7 @@ RUN export DEBIAN_FRONTEND=noninteractive && \
     libgnome-autoar-0-0 \
     libjson-glib-1.0-0 \
     libsoup-3.0-0 \
-    gettext-base \
+    gettext \
     && rm -rf /var/lib/apt/lists/*
 
 
@@ -22,7 +22,6 @@ RUN export DEBIAN_FRONTEND=noninteractive && \
     gcc \
     pkg-config \
     git \
-    gettext \
     libglib2.0-dev \
     libgnome-autoar-0-dev \
     libjson-glib-dev \
@@ -57,6 +56,8 @@ FROM app AS test
 COPY wiremock/cert.pem /usr/local/share/ca-certificates/wiremock.crt
 RUN update-ca-certificates
 
+# Fix: msgfmt available for translations
+RUN apt-get update && apt-get install -y gettext-base && rm -rf /var/lib/apt/lists/*
 
 # Make sure we don't copy the test certificate to the final image by default.
 FROM app
