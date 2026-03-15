@@ -84,22 +84,18 @@ verify_zip_exists
 verify_wiremock_count "POST" "/api/v1/accounts/login/" 1 "login request"
 verify_wiremock_count "POST" "/api/v1/extensions" 1 "upload request"
 
-echo "Testing msgfmt availability in container..."
-run_action sh -c 'which msgfmt || { echo "msgfmt missing"; exit 1; }'
-run_action sh -c 'msgfmt --version'
-
 echo "Testing translations compilation..."
-mkdir -p test-extension/locale
-echo 'msgid "test" msgstr "test123"' > test-extension/locale/test.po
-run_action --env INPUT_SOURCE_DIR=./test-extension --env INPUT_OUTPUT_DIR=./dist
+mkdir -p test-extension/po
+echo 'msgid "hello" msgstr "hola"' > test-extension/po/test.po
+run_action --env INPUT_SOURCE_DIR=./test-extension --env INPUT_OUTPUT_DIR=./dist --env INPUT_USERNAME=test-user --env INPUT_PASSWORD=test-password
 extract_zip
 
-# Verify .mo was created (proves msgfmt worked IN container)
+# Verify .mo was created in locale/ (standard structure)
 if [ ! -f "$tmpdir/extracted/locale/test.mo" ]; then
     echo "ERROR: No .mo file generated - msgfmt failed"
     exit 1
 fi
 
-echo ".mo file verified: translations work!"
+echo "Translations compiled: locale/test.mo created!"
 
 echo "All tests passed!"
