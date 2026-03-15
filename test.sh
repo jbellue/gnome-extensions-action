@@ -50,16 +50,7 @@ verify_wiremock_count() {
 
 echo "Building docker image..."
 
-
-
-
-docker compose -f docker-compose.test.yml build --no-cache
-
-echo "=== DEBUG: Verify gettext-base in test image ==="
-docker compose -f docker-compose.test.yml run --rm action dpkg -l | grep gettext || echo "❌ NO GETTEXT"
-docker compose -f docker-compose.test.yml run --rm action ls -la /usr/bin/msg* || echo "❌ msgfmt MISSING"
-docker compose -f docker-compose.test.yml run --rm action which msgfmt || echo "❌ which msgfmt failed"
-
+docker compose -f docker-compose.test.yml build
 
 echo "Testing basic package and GITHUB_OUTPUT..."
 mkdir -p ./test-output
@@ -96,13 +87,24 @@ verify_wiremock_count "POST" "/api/v1/extensions" 1 "upload request"
 
 echo "Testing translations compilation..."
 mkdir -p test-extension/po
+
 echo 'msgid "hello" msgstr "hola"' > test-extension/po/test.po
-run_action --env INPUT_SOURCE_DIR=./test-extension --env INPUT_OUTPUT_DIR=./dist --env INPUT_USERNAME=test-user --env INPUT_PASSWORD=test-password
+
+run_action --env INPUT_SOURCE_DIR=./test-extension \
+           --env INPUT_OUTPUT_DIR=./dist \
+           --env INPUT_GETTEXT_DOMAIN="test-extension" \
+           --env INPUT_USERNAME=test-user \
+		   --env INPUT_PASSWORD=test-password
 extract_zip
 
-# Verify .mo was created in locale/ (standard structure)
-if [ ! -f "$tmpdir/extracted/locale/test.mo" ]; then
-    echo "ERROR: No .mo file generated - msgfmt failed"
+# Verify standard .mo path
+if [ ! -f "$tmpdir/extracted/locale/test-extension/LC_MESSAGES/test-extension.mo" ]; then
+    echo "ERROR: No .mo file generated"
+	echo "content of test-extension:"
+	echo "=== DEBUG test-extension contents ==="
+	ls -la test-extension/
+	ls -la test-extension/po/ || echo "No po/ dir"
+	cat test-extension/metadata
     exit 1
 fi
 
