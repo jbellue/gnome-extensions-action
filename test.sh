@@ -84,21 +84,17 @@ verify_zip_exists
 verify_wiremock_count "POST" "/api/v1/accounts/login/" 1 "login request"
 verify_wiremock_count "POST" "/api/v1/extensions" 1 "upload request"
 
-# Verify msgfmt works in final runtime
-echo "Testing msgfmt availability..."
-if ! which msgfmt >/dev/null 2>&1; then
-    echo "ERROR: msgfmt not found in final image"
-    exit 1
-fi
-msgfmt --version
+echo "Testing msgfmt availability in container..."
+run_action sh -c 'which msgfmt || { echo "msgfmt missing"; exit 1; }'
+run_action sh -c 'msgfmt --version'
 
-# Test translations compilation
+echo "Testing translations compilation..."
 mkdir -p test-extension/locale
 echo 'msgid "test" msgstr "test123"' > test-extension/locale/test.po
 run_action --env INPUT_SOURCE_DIR=./test-extension --env INPUT_OUTPUT_DIR=./dist
 extract_zip
 
-# Verify .mo was created (proves msgfmt worked)
+# Verify .mo was created (proves msgfmt worked IN container)
 if [ ! -f "$tmpdir/extracted/locale/test.mo" ]; then
     echo "ERROR: No .mo file generated - msgfmt failed"
     exit 1
