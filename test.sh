@@ -49,7 +49,17 @@ verify_wiremock_count() {
 }
 
 echo "Building docker image..."
-docker compose -f docker-compose.test.yml build
+
+
+
+
+docker compose -f docker-compose.test.yml build --no-cache
+
+echo "=== DEBUG: Verify gettext-base in test image ==="
+docker compose -f docker-compose.test.yml run --rm action dpkg -l | grep gettext || echo "❌ NO GETTEXT"
+docker compose -f docker-compose.test.yml run --rm action ls -la /usr/bin/msg* || echo "❌ msgfmt MISSING"
+docker compose -f docker-compose.test.yml run --rm action which msgfmt || echo "❌ which msgfmt failed"
+
 
 echo "Testing basic package and GITHUB_OUTPUT..."
 mkdir -p ./test-output
