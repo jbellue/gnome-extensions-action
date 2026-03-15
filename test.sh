@@ -49,6 +49,7 @@ verify_wiremock_count() {
 }
 
 echo "Building docker image..."
+
 docker compose -f docker-compose.test.yml build
 
 echo "Testing basic package and GITHUB_OUTPUT..."
@@ -83,5 +84,25 @@ run_action --env INPUT_SOURCE_DIR=./test-extension --env INPUT_OUTPUT_DIR=./dist
 verify_zip_exists
 verify_wiremock_count "POST" "/api/v1/accounts/login/" 1 "login request"
 verify_wiremock_count "POST" "/api/v1/extensions" 1 "upload request"
+
+echo "Testing translations compilation..."
+mkdir -p test-extension/po
+
+echo 'msgid "hello" msgstr "hola"' > test-extension/po/test-extension.po
+
+run_action --env INPUT_SOURCE_DIR=./test-extension \
+           --env INPUT_OUTPUT_DIR=./dist \
+           --env INPUT_GETTEXT_DOMAIN="test-extension" \
+           --env INPUT_USERNAME=test-user \
+		   --env INPUT_PASSWORD=test-password
+extract_zip
+
+# Verify standard .mo path
+if [ ! -f "$tmpdir/extracted/locale/test-extension/LC_MESSAGES/test-extension.mo" ]; then
+    echo "ERROR: No .mo - checking structure:"
+    find "$tmpdir/extracted" -name "*.mo" || echo "No .mo files found"
+    exit 1
+fi
+echo "Translations compiled: correct .mo file created!"
 
 echo "All tests passed!"
