@@ -8,6 +8,7 @@ RUN export DEBIAN_FRONTEND=noninteractive && \
     libgnome-autoar-0-0 \
     libjson-glib-1.0-0 \
     libsoup-3.0-0 \
+    gettext-base \
     && rm -rf /var/lib/apt/lists/*
 
 
@@ -22,7 +23,6 @@ RUN export DEBIAN_FRONTEND=noninteractive && \
     pkg-config \
     git \
     gettext \
-    gettext-base \
     libglib2.0-dev \
     libgnome-autoar-0-dev \
     libjson-glib-dev \
