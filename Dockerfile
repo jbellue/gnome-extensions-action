@@ -22,6 +22,7 @@ RUN export DEBIAN_FRONTEND=noninteractive && \
     pkg-config \
     git \
     gettext \
+    gettext-base \
     libglib2.0-dev \
     libgnome-autoar-0-dev \
     libjson-glib-dev \
