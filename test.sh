@@ -88,7 +88,7 @@ verify_wiremock_count "POST" "/api/v1/extensions" 1 "upload request"
 echo "Testing translations compilation..."
 mkdir -p test-extension/po
 
-echo 'msgid "hello" msgstr "hola"' > test-extension/po/test.po
+echo 'msgid "hello" msgstr "hola"' > test-extension/po/test-extension.po
 
 run_action --env INPUT_SOURCE_DIR=./test-extension \
            --env INPUT_OUTPUT_DIR=./dist \
@@ -99,15 +99,10 @@ extract_zip
 
 # Verify standard .mo path
 if [ ! -f "$tmpdir/extracted/locale/test-extension/LC_MESSAGES/test-extension.mo" ]; then
-    echo "ERROR: No .mo file generated"
-	echo "content of test-extension:"
-	echo "=== DEBUG test-extension contents ==="
-	ls -la test-extension/
-	ls -la test-extension/po/ || echo "No po/ dir"
-	cat test-extension/metadata
+    echo "ERROR: No .mo - checking structure:"
+    find "$tmpdir/extracted" -name "*.mo" || echo "No .mo files found"
     exit 1
 fi
-
-echo "Translations compiled: locale/test.mo created!"
+echo "Translations compiled: correct .mo file created!"
 
 echo "All tests passed!"
