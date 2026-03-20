@@ -41,4 +41,6 @@ if [ -n "$INPUT_USERNAME" ] && [ -n "$INPUT_PASSWORD" ]; then
 	UPLOAD_ARGS+=(--password "$INPUT_PASSWORD")
 	if [ "$INPUT_ACCEPT_TOS" = "true" ]; then UPLOAD_ARGS+=(--accept-tos); fi
 	gnome-extensions upload "${UPLOAD_ARGS[@]}" "$ZIP_FILE"
+else
+	echo "Missing username or password, skipping upload"
 fi
