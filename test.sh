@@ -99,9 +99,14 @@ extract_zip
 
 # Verify standard .mo path
 if [ ! -f "$tmpdir/extracted/locale/test-extension/LC_MESSAGES/test-extension.mo" ]; then
-    echo "ERROR: No .mo - checking structure:"
-    find "$tmpdir/extracted" -name "*.mo" || echo "No .mo files found"
-    exit 1
+	echo "ERROR: No .mo - checking structure:"
+	mo_files=$(find "$tmpdir/extracted" -name "*.mo")
+	if [ -z "$mo_files" ]; then
+		echo "No .mo files found"
+	else
+		echo "$mo_files"
+	fi
+	exit 1
 fi
 echo "Translations compiled: correct .mo file created!"
 
