@@ -10,6 +10,7 @@ cleanup() {
 	if [ -n "${tmpdir:-}" ]; then rm -rf "$tmpdir"; fi
 	if [ -d "./dist" ]; then rm -rf ./dist; fi
 	if [ -d "./test-output" ]; then rm -rf ./test-output; fi
+	if [ -d "./test-extension/po" ]; then rm -rf ./test-extension/po; fi
 }
 trap cleanup EXIT
 
@@ -85,6 +86,11 @@ verify_zip_exists
 verify_wiremock_count "POST" "/api/v1/accounts/login/" 1 "login request"
 verify_wiremock_count "POST" "/api/v1/extensions" 1 "upload request"
 
+echo "Testing translations compilation..."
+mkdir -p test-extension/po
+
+echo 'msgid "hello" msgstr "hola"' > test-extension/po/test-extension.po
+
 run_action --env INPUT_SOURCE_DIR=./test-extension \
            --env INPUT_OUTPUT_DIR=./dist \
            --env INPUT_GETTEXT_DOMAIN="test-extension" \
@@ -92,7 +98,7 @@ run_action --env INPUT_SOURCE_DIR=./test-extension \
 		   --env INPUT_PASSWORD=test-password
 extract_zip
 
-# Verify translations compilation in standard .mo path
+# Verify standard .mo path
 if [ ! -f "$tmpdir/extracted/locale/test-extension/LC_MESSAGES/test-extension.mo" ]; then
 	echo "ERROR: No .mo - checking structure:"
 	mo_files=$(find "$tmpdir/extracted" -name "*.mo")
