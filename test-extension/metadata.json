@@ -4,5 +4,7 @@
   "description": "A test extension for CI",
   "shell-version": ["45", "46"],
   "version": 1,
-  "url": "https://github.com/test/test-extension"
+  "url": "https://github.com/test/test-extension",
+  "gettext-domain": "test-extension",
+  "locale": "po"
 }
